@@ -21,25 +21,11 @@ public:
         Q_UNUSED(path); Q_UNUSED(textEdit);
         qDebug()<< "Base output was called called";
     }*/
-
-    json loadFromFile(const QString& filename) {
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qDebug() << "Cannot open file:" << filename;
-            return json::array();
-        }
-
-        QTextStream stream(&file);
-        QString content = stream.readAll();
-
-        return json::parse(content.toStdString());
-    }
     void outputtingJsonToATable(const QString& filename, QTableWidget* table){
-
         json data = loadFromFile(filename);
-
         table->setRowCount(0);
         int row = 0;
+
         for (const auto& item : data){
             table->insertRow(row);
 
@@ -49,13 +35,13 @@ public:
             table->setItem(row, 0, itemId);
 
             QString originalName = QString::fromStdString(item["name"]);
-            QString modifiedName = originalName;
+            QString modifiedName = convertVowelsToUppercase(originalName);
             QTableWidgetItem *itemName = new QTableWidgetItem(modifiedName);
             table->setItem(row, 1, itemName);
 
             float price = item["price"];
             QTableWidgetItem *itemPrice = new QTableWidgetItem(QString::number(price, 'f', 2));
-            itemPrice->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            itemPrice->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
             table->setItem(row, 2, itemPrice);
 
             QString expiritionDate = QString::fromStdString(item["expiration_date"]); //!!!
@@ -80,6 +66,30 @@ public:
             i.close();
         }
         textEdit->setText(QString::fromStdString(j.dump(4)));
+    }
+private:
+    json loadFromFile(const QString& filename) {
+        QFile file(filename);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qDebug() << "Cannot open file:" << filename;
+            return json::array();
+        }
+
+        QTextStream stream(&file);
+        QString content = stream.readAll();
+
+        return json::parse(content.toStdString());
+    }
+    QString convertVowelsToUppercase(QString& line){
+        // Список гласных (русский + английский)
+        QString vowels = "aeiouyаеёиоуыэюя";
+
+        for (int i = 0; i < line.length(); ++i) {
+            if (vowels.contains(line[i], Qt::CaseInsensitive)) {
+                line[i] = line[i].toUpper();
+            }
+        }
+        return line;
     }
 };
 
