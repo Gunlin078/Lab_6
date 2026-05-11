@@ -34,7 +34,7 @@ inline long dateToLong(const std::string& date) {
     // Результат: 20260407
 }
 
-inline std::unique_ptr<Product> createProductFromJson(const nlohmann::json& jsonObj) {
+inline std::unique_ptr<Product> createProductFromJson(const json& jsonObj) {
         // Правильный порядок
         int id =                  jsonObj.value("id", 0);
         std::string name =        jsonObj.value("name", "");
