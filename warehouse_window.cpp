@@ -20,10 +20,22 @@ WarehouseWindow::WarehouseWindow(QWidget *parent)
         ui->Output_TableW->horizontalHeader()->setStretchLastSection(true);
         ui->Output_TableW->setAlternatingRowColors(true);
         ui->Output_TableW->setEditTriggers(QAbstractItemView::NoEditTriggers);}
-    QObject::connect(ui->Enter_PB, &QPushButton::clicked, [this](){processor.output(ui->GettingPath_LE->text(), ui->Output_TE); });
-
-    QObject::connect(ui->Enter_PB, &QPushButton::clicked, [this](){processor.outputtingJsonToATable(
-                                                                         ui->GettingPath_LE->text(), ui->Output_TableW); });
+    QObject::connect(ui->Parse_PB, &QPushButton::clicked, [this](){
+        QString userPath = ui->GettingPath_LE->text();
+        processor.outputtingJsonToATextField(userPath, ui->Output_TE);
+        processor.outputtingJsonToATable    (userPath, ui->Output_TableW);
+        if (ui->Input_TE->toPlainText().isEmpty())
+        {
+            QString text = ui->Output_TE->toPlainText();
+            QString result = processor.jsonUpperVowelsInName(text);
+            ui->Input_TE->setText(result);}});
+    QObject::connect(ui->Load_PB,  &QPushButton::clicked, [this](){
+        if (ui->Input_TE->toPlainText().isEmpty())       return;
+        if (!json::accept(ui->Input_TE->toPlainText().toStdString()))
+            {qDebug()<<"Incorrect punctuation for json"; return;}
+        json j = json::parse(ui->Input_TE->toPlainText().toStdString());
+        processor.saveToJSON(j, ui->WritingPath_LE->text());
+    });
 }
 
 WarehouseWindow::~WarehouseWindow()
